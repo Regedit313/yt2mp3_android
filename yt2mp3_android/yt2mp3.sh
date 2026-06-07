@@ -47,24 +47,28 @@ normalize_mp3() {
 }
 
 while true; do
-    echo ""
+    clear
+
+    echo
     echo "yt2mp3_android"
-    echo ""
+    echo
     echo "1) Download audio from URL (best quality)"
     echo "2) Fix + normalize files (to .mp3)"
     echo "3) Fix files only (to .mp3)"
     echo "4) Normalize files only (must be .mp3)"
     echo "9) Run first-time setup (required before first use)"
     echo "0) Exit"
-    echo ""
+    echo
 
     read -p "Choose what to do: " choice
 
     case "$choice" in
 
         1)
+            clear
+
             while true; do
-                echo ""
+                echo
                 read -p "Paste URL or type 0 to return to menu: " url
 
                 if [ "$url" = "0" ]; then
@@ -75,41 +79,60 @@ while true; do
                 yt-dlp -f 251/bestaudio -x "$url"
                 cd ..
 
-                echo ""
+                echo
                 echo "Download completed."
+                echo
             done
             ;;
 
         2)
+            clear
+
             fix_mp3
             normalize_mp3
-            echo ""
+
+            echo
             echo "Fix + normalize completed."
+            echo
+            read -p "Press Enter to continue..."
             ;;
 
         3)
+            clear
+
             fix_mp3
-            echo ""
+
+            echo
             echo "Fix completed."
+            echo
+            read -p "Press Enter to continue..."
             ;;
 
         4)
+            clear
+
             normalize_mp3
-            echo ""
+
+            echo
             echo "Normalize completed."
+            echo
+            read -p "Press Enter to continue..."
             ;;
 
         9)
+            clear
             bash ./yt2mp3_setup.sh
             ;;
 
         0)
-            echo "Exit."
+            clear
             exit 0
             ;;
 
         *)
+            echo
             echo "Invalid choice."
+            sleep 1
             ;;
 
     esac
