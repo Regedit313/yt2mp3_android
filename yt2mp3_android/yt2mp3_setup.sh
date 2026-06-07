@@ -1,34 +1,43 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
+clear
+
 cd "$(dirname "$0")" || exit 1
 
-echo "Creating project folders..."
+echo
+echo "yt2mp3_android setup"
+echo
 
+echo "Creating project folders..."
 mkdir -p download
 
-echo ""
+echo
 echo "Updating Termux..."
 pkg update -y
 pkg upgrade -y
 
 if [ ! -d ~/storage/shared ]; then
+    echo
     echo "Setting up storage..."
     termux-setup-storage
 else
+    echo
     echo "Storage is already configured."
 fi
 
-echo ""
+echo
 echo "Installing yt-dlp..."
 pkg install yt-dlp -y
 
-echo ""
+echo
 echo "Installing FFmpeg..."
 pkg install ffmpeg -y
 
-echo ""
+echo
 echo "Installing MP3Gain..."
 pkg install mp3gain -y
 
-echo ""
+echo
 echo "Installation completed."
+echo
+read -p "Press Enter to continue..."
