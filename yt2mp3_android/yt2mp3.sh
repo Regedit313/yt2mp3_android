@@ -46,6 +46,125 @@ normalize_mp3() {
     cd ..
 }
 
+download_video() {
+    while true; do
+        clear
+
+        echo
+        echo "Download Video from URL"
+        echo
+        echo "1) Choose Video + Auto Best Audio"
+        echo
+        echo "2) Choose Video + Choose Audio"
+        echo
+        echo "0) Return"
+        echo
+        echo
+
+        read -p "Choose what to do: " mode
+
+        case "$mode" in
+
+            1)
+                clear
+
+                while true; do
+                    echo
+                    echo "Choose Video + Auto Best Audio"
+                    echo
+                    read -p "Paste URL or type 0 to return: " url
+
+                    if [ "$url" = "0" ]; then
+                        break
+                    fi
+
+                    echo
+                    echo "Searching available formats, please wait..."
+                    echo
+
+                    yt-dlp -F "$url"
+
+                    echo
+                    read -p "Enter video format ID: " video_id
+
+                    [ -z "$video_id" ] && continue
+
+                    cd download || exit 1
+
+                    yt-dlp \
+                        -f "$video_id+251/bestaudio" \
+                        --merge-output-format mp4 \
+                        "$url"
+
+                    cd ..
+
+                    echo
+                    echo "Video download completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                    clear
+                done
+                ;;
+
+            2)
+                clear
+
+                while true; do
+                    echo
+                    echo "Choose Video + Choose Audio"
+                    echo
+                    read -p "Paste URL or type 0 to return: " url
+
+                    if [ "$url" = "0" ]; then
+                        break
+                    fi
+
+                    echo
+                    echo "Searching available formats, please wait..."
+                    echo
+
+                    yt-dlp -F "$url"
+
+                    echo
+                    read -p "Enter video format ID: " video_id
+
+                    [ -z "$video_id" ] && continue
+
+                    echo
+                    read -p "Enter audio format ID: " audio_id
+
+                    [ -z "$audio_id" ] && continue
+
+                    cd download || exit 1
+
+                    yt-dlp \
+                        -f "$video_id+$audio_id" \
+                        --merge-output-format mp4 \
+                        "$url"
+
+                    cd ..
+
+                    echo
+                    echo "Video download completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                    clear
+                done
+                ;;
+
+            0)
+                break
+                ;;
+
+            *)
+                echo
+                echo "Invalid choice."
+                sleep 1
+                ;;
+        esac
+    done
+}
+
 while true; do
     clear
 
@@ -62,6 +181,9 @@ while true; do
     echo "4) Normalize Volume files only (must be .mp3)"
     echo
     echo
+    echo "5) Download Video from URL (to .mp4)"
+    echo
+    echo
     echo "9) Run first-time Setup (required before first use)"
     echo
     echo "0) Exit"
@@ -76,6 +198,8 @@ while true; do
             clear
 
             while true; do
+                echo
+                echo "Download Audio from URL"
                 echo
                 read -p "Paste URL or type 0 to return to menu: " url
 
@@ -125,6 +249,11 @@ while true; do
             echo "Normalize completed."
             echo
             read -p "Press Enter to continue..."
+            ;;
+
+        5)
+            clear
+            download_video
             ;;
 
         9)
