@@ -22,11 +22,11 @@ bash ~/storage/shared/yt2mp3_android/yt2mp3.sh
 
 For the first use, before using any other menu option, select:
 
-9 = Run first-time setup (required before first use)
+9 = Run first-time Setup (required before first use)
 
 This step installs all required dependencies and prepares the project folders.
 
-The first-time setup must be completed before the first use.
+The first-time Setup must be completed before the first use.
 
 ---
 
@@ -34,15 +34,15 @@ The first-time setup must be completed before the first use.
 
 When started, yt2mp3.sh provides the following options:
 
-1 = Download audio from URL (best quality)
+1 = Download Audio from URL (best quality)
 
-2 = Fix + normalize files (to .mp3)
+2 = Fix Format + Normalize Volume files (to .mp3)
 
-3 = Fix files only (to .mp3)
+3 = Fix Format files only (to .mp3)
 
-4 = Normalize files only (must be .mp3)
+4 = Normalize Volume files only (must be .mp3)
 
-9 = Run first-time setup (required before first use)
+9 = Run first-time Setup (required before first use)
 
 0 = Exit
 
@@ -52,7 +52,7 @@ When started, yt2mp3.sh provides the following options:
 
 Select:
 
-1 = Download audio from URL (best quality)
+1 = Download Audio from URL (best quality)
 
 Paste a supported URL.
 
@@ -72,11 +72,11 @@ Downloaded files are saved using the best audio quality available from the sourc
 
 ---
 
-## Fix Files
+## Fix Format files
 
 Select:
 
-3 = Fix files only (to .mp3)
+3 = Fix Format files only (to .mp3)
 
 This option converts audio files to a highly compatible MP3 format.
 
@@ -109,11 +109,11 @@ The original source file is automatically removed after a successful conversion.
 
 ---
 
-## Normalize Files
+## Normalize Volume Files
 
 Select:
 
-4 = Normalize files only (must be .mp3)
+4 = Normalize Volume files only (must be .mp3)
 
 This option normalizes MP3 volume using MP3Gain.
 
@@ -139,11 +139,11 @@ Files using other audio formats are not supported by this option.
 
 ---
 
-## Fix + Normalize
+## Fix Format + Normalize Volume files
 
 Select:
 
-2 = Fix + normalize files (to .mp3)
+2 = Fix Format + Normalize Volume files (to .mp3)
 
 This option performs both operations automatically:
 
