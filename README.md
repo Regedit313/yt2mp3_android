@@ -36,7 +36,7 @@ When started, yt2mp3.sh provides the following options:
 
 1 = Download Audio from URL (best quality)
 
-2 = Fix Format + Normalize volume files (to .mp3)
+2 = Fix Format + Normalize Volume files (to .mp3)
 
 3 = Fix Format files only (to .mp3)
 
