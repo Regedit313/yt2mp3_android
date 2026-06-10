@@ -7,11 +7,16 @@ mkdir -p download
 fix_mp3() {
     cd download || exit 1
 
-    find . -type f ! -iname "*_fixed.mp3" ! -iname "*_fixed_normalized.mp3" ! -iname "*_normalized.mp3" -exec sh -c '
+    find . -type f \
+        ! -iname "*_fixed.mp3" \
+        ! -iname "*_normalized.mp3" \
+        ! -iname "*_320_normalized.mp3" \
+        ! -iname "*_fixed_normalized.mp3" \
+        -exec sh -c '
     for f do
       out="${f%.*}_fixed.mp3"
 
-      ffmpeg -i "$f" \
+      if ffmpeg -i "$f" \
         -vn \
         -acodec libmp3lame \
         -b:a 128k \
@@ -19,11 +24,11 @@ fix_mp3() {
         -ac 2 \
         -write_xing 0 \
         -map_metadata -1 \
-        "$out"
+        "$out"; then
 
-      if [ -f "$out" ]; then
         rm -f "$f"
       else
+        rm -f "$out"
         echo "Error: conversion failed for $f"
       fi
     done
@@ -32,14 +37,55 @@ fix_mp3() {
     cd ..
 }
 
-normalize_mp3() {
+normalize_audio() {
     cd download || exit 1
 
-    find . -type f -iname "*.mp3" ! -iname "*_normalized.mp3" -exec mp3gain -r -s i -c {} +
-
-    find . -type f -iname "*.mp3" ! -iname "*_normalized.mp3" -exec sh -c '
+    find . -type f \
+        ! -iname "*_normalized.mp3" \
+        ! -iname "*_320_normalized.mp3" \
+        ! -iname "*_fixed_normalized.mp3" \
+        -exec sh -c '
     for f do
-      mv "$f" "${f%.mp3}_normalized.mp3"
+      case "$f" in
+        *.[mM][pP]3)
+          base="${f%.[mM][pP]3}"
+          out="${base}_normalized.mp3"
+
+          cp "$f" "$out"
+
+          if mp3gain -r -s i -c "$out"; then
+            rm -f "$f"
+          else
+            rm -f "$out"
+            echo "Error: normalization failed for $f"
+          fi
+          ;;
+
+        *)
+          base="${f%.*}"
+          out="${base}_320_normalized.mp3"
+
+          if ffmpeg -i "$f" \
+            -vn \
+            -acodec libmp3lame \
+            -b:a 320k \
+            -ar 44100 \
+            -ac 2 \
+            -map_metadata -1 \
+            "$out"; then
+
+            if mp3gain -r -s i -c "$out"; then
+              rm -f "$f"
+            else
+              rm -f "$out"
+              echo "Error: normalization failed for $out"
+            fi
+          else
+            rm -f "$out"
+            echo "Error: conversion failed for $f"
+          fi
+          ;;
+      esac
     done
     ' sh {} +
 
@@ -51,11 +97,13 @@ download_video() {
         clear
 
         echo
-        echo "Download Video from URL"
+        echo "Download Video from URL (to .mp4)"
         echo
-        echo "1) Choose Video + Auto Best Audio"
         echo
-        echo "2) Choose Video + Choose Audio"
+        echo "1) Choose Video (+ auto best audio)"
+        echo
+        echo "2) Choose Video + Choose Audio (expert mode)"
+        echo
         echo
         echo "0) Return"
         echo
@@ -70,7 +118,8 @@ download_video() {
 
                 while true; do
                     echo
-                    echo "Choose Video + Auto Best Audio"
+                    echo "Choose Video (+ auto best audio)"
+                    echo
                     echo
                     read -p "Paste URL or type 0 to return: " url
 
@@ -85,7 +134,7 @@ download_video() {
                     yt-dlp -F "$url"
 
                     echo
-                    read -p "Enter video format ID: " video_id
+                    read -p "Enter video format ID (for better audio quality, choose a 'video only' format): " video_id
 
                     [ -z "$video_id" ] && continue
 
@@ -111,7 +160,8 @@ download_video() {
 
                 while true; do
                     echo
-                    echo "Choose Video + Choose Audio"
+                    echo "Choose Video + Choose Audio (expert mode)"
+                    echo
                     echo
                     read -p "Paste URL or type 0 to return: " url
 
@@ -126,12 +176,12 @@ download_video() {
                     yt-dlp -F "$url"
 
                     echo
-                    read -p "Enter video format ID: " video_id
+                    read -p "Enter video format ID (for better audio quality, choose a 'video only' format): " video_id
 
                     [ -z "$video_id" ] && continue
 
                     echo
-                    read -p "Enter audio format ID: " audio_id
+                    read -p "Enter audio format ID (you must choose an 'audio only' format): " audio_id
 
                     [ -z "$audio_id" ] && continue
 
@@ -174,11 +224,11 @@ while true; do
     echo
     echo "1) Download Audio from URL (best quality)"
     echo
-    echo "2) Fix Format + Normalize Volume files (to .mp3)"
+    echo "2) Normalize Volume (best quality)"
     echo
-    echo "3) Fix Format files only (to .mp3)"
+    echo "3) Fix Format (old MP3 players)"
     echo
-    echo "4) Normalize Volume files only (must be .mp3)"
+    echo "4) Fix Format (old MP3 players) + Normalize Volume"
     echo
     echo
     echo "5) Download Video from URL (to .mp4)"
@@ -199,7 +249,8 @@ while true; do
 
             while true; do
                 echo
-                echo "Download Audio from URL"
+                echo "Download Audio from URL (best quality)"
+                echo
                 echo
                 read -p "Paste URL or type 0 to return to menu: " url
 
@@ -214,17 +265,18 @@ while true; do
                 echo
                 echo "Download completed."
                 echo
+                read -p "Press Enter to continue..."
+                clear
             done
             ;;
 
         2)
             clear
 
-            fix_mp3
-            normalize_mp3
+            normalize_audio
 
             echo
-            echo "Fix + normalize completed."
+            echo "Normalize Volume completed."
             echo
             read -p "Press Enter to continue..."
             ;;
@@ -235,7 +287,7 @@ while true; do
             fix_mp3
 
             echo
-            echo "Fix completed."
+            echo "Fix Format completed."
             echo
             read -p "Press Enter to continue..."
             ;;
@@ -243,10 +295,11 @@ while true; do
         4)
             clear
 
-            normalize_mp3
+            fix_mp3
+            normalize_audio
 
             echo
-            echo "Normalize completed."
+            echo "Fix Format + Normalize Volume completed."
             echo
             read -p "Press Enter to continue..."
             ;;
