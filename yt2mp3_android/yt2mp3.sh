@@ -66,6 +66,7 @@ while true; do
     echo
     echo "0) Exit"
     echo
+    echo
 
     read -p "Choose what to do: " choice
 
