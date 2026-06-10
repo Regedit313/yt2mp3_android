@@ -52,11 +52,11 @@ while true; do
     echo
     echo "yt2mp3_android"
     echo
-    echo "1) Download audio from URL (best quality)"
-    echo "2) Fix + normalize files (to .mp3)"
-    echo "3) Fix files only (to .mp3)"
-    echo "4) Normalize files only (must be .mp3)"
-    echo "9) Run first-time setup (required before first use)"
+    echo "1) Download Audio from URL (best quality)"
+    echo "2) Fix Format + Normalize Audio files (to .mp3)"
+    echo "3) Fix Format files only (to .mp3)"
+    echo "4) Normalize Volume files only (must be .mp3)"
+    echo "9) Run first-time Setup (required before first use)"
     echo "0) Exit"
     echo
 
