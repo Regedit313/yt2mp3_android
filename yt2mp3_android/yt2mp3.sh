@@ -92,6 +92,115 @@ normalize_audio() {
     cd ..
 }
 
+download_audio() {
+    while true; do
+        clear
+
+        echo
+        echo "Download Audio from URL"
+        echo
+        echo
+        echo "1) Download Best Audio (recommended)"
+        echo
+        echo "2) Choose Audio Format (expert mode)"
+        echo
+        echo
+        echo "0) Return"
+        echo
+        echo
+
+        read -p "Choose what to do: " mode
+
+        case "$mode" in
+
+            1)
+                clear
+
+                while true; do
+                    echo
+                    echo "Download Best Audio (recommended)"
+                    echo
+                    echo
+                    read -p "Paste URL or type 0 to return: " url
+
+                    if [ "$url" = "0" ]; then
+                        break
+                    fi
+
+                    cd download || exit 1
+
+                    yt-dlp \
+                    -f 251/bestaudio \
+                    -x \
+                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    "$url"
+
+                    cd ..
+
+                    echo
+                    echo "Download completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                    clear
+                done
+                ;;
+
+            2)
+                clear
+
+                while true; do
+                    echo
+                    echo "Choose Audio Format (expert mode)"
+                    echo
+                    echo
+                    read -p "Paste URL or type 0 to return: " url
+
+                    if [ "$url" = "0" ]; then
+                        break
+                    fi
+
+                    echo
+                    echo "Searching available formats, please wait..."
+                    echo
+
+                    yt-dlp -F "$url"
+
+                    echo
+                    read -p "Enter audio format ID (you must choose an 'audio only' format): " audio_id
+
+                    [ -z "$audio_id" ] && continue
+
+                    cd download || exit 1
+
+                    yt-dlp \
+                    -f "$audio_id" \
+                    -x \
+                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    "$url"
+
+                    cd ..
+
+                    echo
+                    echo "Download completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                    clear
+                done
+                ;;
+
+            0)
+                break
+                ;;
+
+            *)
+                echo
+                echo "Invalid choice."
+                sleep 1
+                ;;
+        esac
+    done
+}
+
 download_video() {
     while true; do
         clear
@@ -100,7 +209,7 @@ download_video() {
         echo "Download Video from URL (to .mp4)"
         echo
         echo
-        echo "1) Choose Video (+ auto best audio)"
+        echo "1) Choose Video + Auto Best Audio (recommended)"
         echo
         echo "2) Choose Video + Choose Audio (expert mode)"
         echo
@@ -118,7 +227,7 @@ download_video() {
 
                 while true; do
                     echo
-                    echo "Choose Video (+ auto best audio)"
+                    echo "Choose Video + Auto Best Audio (recommended)"
                     echo
                     echo
                     read -p "Paste URL or type 0 to return: " url
@@ -141,9 +250,10 @@ download_video() {
                     cd download || exit 1
 
                     yt-dlp \
-                        -f "$video_id+251/bestaudio" \
-                        --merge-output-format mp4 \
-                        "$url"
+                    -f "$video_id+251/bestaudio" \
+                    --merge-output-format mp4 \
+                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    "$url"
 
                     cd ..
 
@@ -188,9 +298,10 @@ download_video() {
                     cd download || exit 1
 
                     yt-dlp \
-                        -f "$video_id+$audio_id" \
-                        --merge-output-format mp4 \
-                        "$url"
+                    -f "$video_id+$audio_id" \
+                    --merge-output-format mp4 \
+                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    "$url"
 
                     cd ..
 
@@ -222,7 +333,7 @@ while true; do
     echo "yt2mp3_android"
     echo
     echo
-    echo "1) Download Audio from URL (best quality)"
+    echo "1) Download Audio from URL"
     echo
     echo "2) Normalize Volume (best quality)"
     echo
@@ -246,28 +357,7 @@ while true; do
 
         1)
             clear
-
-            while true; do
-                echo
-                echo "Download Audio from URL (best quality)"
-                echo
-                echo
-                read -p "Paste URL or type 0 to return to menu: " url
-
-                if [ "$url" = "0" ]; then
-                    break
-                fi
-
-                cd download || exit 1
-                yt-dlp -f 251/bestaudio -x "$url"
-                cd ..
-
-                echo
-                echo "Download completed."
-                echo
-                read -p "Press Enter to continue..."
-                clear
-            done
+            download_audio
             ;;
 
         2)
