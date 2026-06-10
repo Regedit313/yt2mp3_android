@@ -1,139 +1,213 @@
-#!/data/data/com.termux/files/usr/bin/bash
+# yt2mp3_android
 
-cd "$(dirname "$0")" || exit 1
+## Installation
 
-mkdir -p download
+1. Install Termux.
 
-fix_mp3() {
-    cd download || exit 1
+2. Copy the "yt2mp3_android" folder to the root of internal storage.
 
-    find . -type f ! -iname "*_fixed.mp3" ! -iname "*_fixed_normalized.mp3" ! -iname "*_normalized.mp3" -exec sh -c '
-    for f do
-      out="${f%.*}_fixed.mp3"
+3. Open Termux and run:
 
-      ffmpeg -i "$f" \
-        -vn \
-        -acodec libmp3lame \
-        -b:a 128k \
-        -ar 44100 \
-        -ac 2 \
-        -write_xing 0 \
-        -map_metadata -1 \
-        "$out"
+termux-setup-storage
 
-      if [ -f "$out" ]; then
-        rm -f "$f"
-      else
-        echo "Error: conversion failed for $f"
-      fi
-    done
-    ' sh {} +
+(When prompted, allow Termux to access all files on your device storage.)
 
-    cd ..
-}
+4. Start yt2mp3:
 
-normalize_mp3() {
-    cd download || exit 1
+bash ~/storage/shared/yt2mp3_android/yt2mp3.sh
 
-    find . -type f -iname "*.mp3" ! -iname "*_normalized.mp3" -exec mp3gain -r -s i -c {} +
+(The scripts can be launched from any location in Termux.)
 
-    find . -type f -iname "*.mp3" ! -iname "*_normalized.mp3" -exec sh -c '
-    for f do
-      mv "$f" "${f%.mp3}_normalized.mp3"
-    done
-    ' sh {} +
+5. IMPORTANT:
 
-    cd ..
-}
+For the first use, before using any other menu option, select:
 
-while true; do
-    clear
+9 = Run first-time Setup (required before first use)
 
-    echo
-    echo "yt2mp3_android"
-    echo
-    echo "1) Download Audio from URL (best quality)"
-    echo "2) Fix Format + Normalize Volume files (to .mp3)"
-    echo "3) Fix Format files only (to .mp3)"
-    echo "4) Normalize Volume files only (must be .mp3)"
-    echo "9) Run first-time Setup (required before first use)"
-    echo "0) Exit"
-    echo
+This step installs all required dependencies and prepares the project folders.
 
-    read -p "Choose what to do: " choice
+The first-time Setup must be completed before the first use.
 
-    case "$choice" in
+---
 
-        1)
-            clear
+## Menu
 
-            while true; do
-                echo
-                read -p "Paste URL or type 0 to return to menu: " url
+When started, yt2mp3.sh provides the following options:
 
-                if [ "$url" = "0" ]; then
-                    break
-                fi
+1 = Download Audio from URL (best quality)
 
-                cd download || exit 1
-                yt-dlp -f 251/bestaudio -x "$url"
-                cd ..
+2 = Fix Format + Normalize Volume files (to .mp3)
 
-                echo
-                echo "Download completed."
-                echo
-            done
-            ;;
+3 = Fix Format files only (to .mp3)
 
-        2)
-            clear
+4 = Normalize Volume files only (must be .mp3)
 
-            fix_mp3
-            normalize_mp3
+9 = Run first-time Setup (required before first use)
 
-            echo
-            echo "Fix + normalize completed."
-            echo
-            read -p "Press Enter to continue..."
-            ;;
+0 = Exit
 
-        3)
-            clear
+---
 
-            fix_mp3
+## Download Audio
 
-            echo
-            echo "Fix completed."
-            echo
-            read -p "Press Enter to continue..."
-            ;;
+Select:
 
-        4)
-            clear
+1 = Download Audio from URL (best quality)
 
-            normalize_mp3
+Paste a supported URL.
 
-            echo
-            echo "Normalize completed."
-            echo
-            read -p "Press Enter to continue..."
-            ;;
+The downloaded audio files are saved in:
 
-        9)
-            clear
-            bash ./yt2mp3_setup.sh
-            ;;
+download/
 
-        0)
-            clear
-            exit 0
-            ;;
+You can download multiple URLs without leaving the menu.
 
-        *)
-            echo
-            echo "Invalid choice."
-            sleep 1
-            ;;
+Enter:
 
-    esac
-done
+0
+
+to return to the main menu.
+
+Downloaded files are saved using the best audio quality available from the source.
+
+---
+
+## Fix Format files
+
+Select:
+
+3 = Fix Format files only (to .mp3)
+
+This option converts audio files to a highly compatible MP3 format.
+
+The generated files use the following profile:
+
+- MP3 (libmp3lame)
+- 128 kbps
+- 44.1 kHz
+- Stereo
+- No metadata
+- No Xing header
+
+Fixed files are saved with:
+
+_fixed.mp3
+
+added to the filename.
+
+Example:
+
+song.m4a
+
+becomes:
+
+song_fixed.mp3
+
+This mode is intended for maximum compatibility with older MP3 players and devices.
+
+The original source file is automatically removed after a successful conversion.
+
+---
+
+## Normalize Volume files
+
+Select:
+
+4 = Normalize Volume files only (must be .mp3)
+
+This option normalizes MP3 volume using MP3Gain.
+
+Normalized files are saved with:
+
+_normalized.mp3
+
+added to the filename.
+
+Example:
+
+song.mp3
+
+becomes:
+
+song_normalized.mp3
+
+This helps maintain a more consistent playback volume between tracks.
+
+Only MP3 files can be normalized.
+
+Files using other audio formats are not supported by this option.
+
+---
+
+## Fix Format + Normalize Volume files
+
+Select:
+
+2 = Fix Format + Normalize Volume files (to .mp3)
+
+This option performs both operations automatically:
+
+1. Convert files to the compatible MP3 profile.
+2. Normalize volume with MP3Gain.
+
+Generated files are saved with:
+
+_fixed_normalized.mp3
+
+added to the filename.
+
+This is the recommended option for preparing files for older MP3 players.
+
+The original source file is automatically removed after a successful conversion.
+
+---
+
+## Folder Structure
+
+### Folder Structure After First Launch
+
+yt2mp3_android/
+
+---- README.md
+
+---- yt2mp3.sh
+
+---- yt2mp3_setup.sh
+
+---- download/
+
+All downloaded and processed files are stored inside:
+
+download/
+
+---
+
+## Notes
+
+The required folders are automatically created if they do not already exist.
+
+The download/ folder is automatically recreated if it is missing.
+
+All downloaded, fixed, and normalized files are stored in the download/ folder.
+
+Downloaded files can be processed individually or in batches.
+
+Multiple URLs can be downloaded before running conversion or normalization.
+
+The original files are automatically removed after a successful conversion to the compatible MP3 profile.
+
+Normalization only processes MP3 files.
+
+This project is intended for personal audio conversion and compatibility purposes.
+
+---
+
+## Credits
+
+Uses:
+
+- yt-dlp
+- FFmpeg
+- MP3Gain
+
+This repository provides a simple Android/Termux workflow for downloading, converting, and normalizing audio files.
