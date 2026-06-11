@@ -212,6 +212,76 @@ download_audio() {
     done
 }
 
+audio_tools() {
+    while true; do
+        clear
+
+        echo
+        echo "Audio Tools / Convert"
+        echo
+        echo
+        echo "1) Normalize Volume (best quality)"
+        echo
+        echo "2) Fix Format (old MP3 players)"
+        echo
+        echo "3) Fix Format (old MP3 players) + Normalize Volume"
+        echo
+        echo
+        echo "0) Return"
+        echo
+        echo
+
+        read -p "Choose what to do: " choice
+
+        case "$choice" in
+
+            1)
+                clear
+
+                normalize_audio
+
+                echo
+                echo "Normalize Volume completed."
+                echo
+                read -p "Press Enter to continue..."
+                ;;
+
+            2)
+                clear
+
+                fix_mp3
+
+                echo
+                echo "Fix Format completed."
+                echo
+                read -p "Press Enter to continue..."
+                ;;
+
+            3)
+                clear
+
+                fix_mp3
+                normalize_audio
+
+                echo
+                echo "Fix Format + Normalize Volume completed."
+                echo
+                read -p "Press Enter to continue..."
+                ;;
+
+            0)
+                break
+                ;;
+
+            *)
+                echo
+                echo "Invalid choice."
+                sleep 1
+                ;;
+        esac
+    done
+}
+
 download_video_auto_quality() {
     orientation="$1"
     quality="$2"
@@ -526,16 +596,11 @@ while true; do
     echo "yt2mp3_android"
     echo
     echo
-    echo "1) Download Audio from URL"
+    echo "1) Audio Download from URL"
     echo
-    echo "2) Normalize Volume (best quality)"
+    echo "2) Audio Tools / Convert"
     echo
-    echo "3) Fix Format (old MP3 players)"
-    echo
-    echo "4) Fix Format (old MP3 players) + Normalize Volume"
-    echo
-    echo
-    echo "5) Download Video from URL (to .mp4)"
+    echo "3) Video Download from URL"
     echo
     echo
     echo "9) Run first-time Setup (required before first use)"
@@ -555,39 +620,10 @@ while true; do
 
         2)
             clear
-
-            normalize_audio
-
-            echo
-            echo "Normalize Volume completed."
-            echo
-            read -p "Press Enter to continue..."
+            audio_tools
             ;;
 
         3)
-            clear
-
-            fix_mp3
-
-            echo
-            echo "Fix Format completed."
-            echo
-            read -p "Press Enter to continue..."
-            ;;
-
-        4)
-            clear
-
-            fix_mp3
-            normalize_audio
-
-            echo
-            echo "Fix Format + Normalize Volume completed."
-            echo
-            read -p "Press Enter to continue..."
-            ;;
-
-        5)
             clear
             download_video
             ;;
