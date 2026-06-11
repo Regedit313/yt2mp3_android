@@ -132,6 +132,10 @@ download_audio() {
                     yt-dlp \
                     -f 251/bestaudio \
                     -x \
+                    --retries infinite \
+                    --fragment-retries infinite \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
                     "$url"
 
@@ -175,6 +179,10 @@ download_audio() {
                     yt-dlp \
                     -f "$audio_id" \
                     -x \
+                    --retries infinite \
+                    --fragment-retries infinite \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
                     "$url"
 
@@ -224,12 +232,20 @@ download_video_auto_quality() {
             yt-dlp \
             -f "bv*[vcodec*=avc1][height<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][height<=${quality}]/b[height<=${quality}]/bv*[height<=${quality}]+(251/bestaudio)" \
             --merge-output-format mp4 \
+            --retries infinite \
+            --fragment-retries infinite \
+            --extractor-retries 10 \
+            --retry-sleep 2 \
             -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
             "$url"
         else
             yt-dlp \
             -f "bv*[vcodec*=avc1][width<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][width<=${quality}]/b[width<=${quality}]/bv*[width<=${quality}]+(251/bestaudio)" \
             --merge-output-format mp4 \
+            --retries infinite \
+            --fragment-retries infinite \
+            --extractor-retries 10 \
+            --retry-sleep 2 \
             -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
             "$url"
         fi
@@ -412,6 +428,10 @@ download_video() {
                     yt-dlp \
                     -f "$video_id+(251/bestaudio)" \
                     --merge-output-format mp4 \
+                    --retries infinite \
+                    --fragment-retries infinite \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
                     "$url"
 
@@ -460,6 +480,10 @@ download_video() {
                     yt-dlp \
                     -f "$video_id+$audio_id" \
                     --merge-output-format mp4 \
+                    --retries infinite \
+                    --fragment-retries infinite \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
                     "$url"
 
