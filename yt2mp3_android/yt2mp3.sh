@@ -167,7 +167,10 @@ download_audio() {
                     echo "Searching available formats, please wait..."
                     echo
 
-                    yt-dlp -F "$url"
+                    yt-dlp \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
+                    -F "$url"
 
                     echo
                     read -p "Enter audio format ID (you must choose an 'audio only' format): " audio_id
@@ -416,7 +419,10 @@ download_video() {
                     echo "Searching available formats, please wait..."
                     echo
 
-                    yt-dlp -F "$url"
+                    yt-dlp \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
+                    -F "$url"
 
                     echo
                     read -p "Enter video format ID (for better audio quality, choose a 'video only' format): " video_id
@@ -463,7 +469,10 @@ download_video() {
                     echo "Searching available formats, please wait..."
                     echo
 
-                    yt-dlp -F "$url"
+                    yt-dlp \
+                    --extractor-retries 10 \
+                    --retry-sleep 2 \
+                    -F "$url"
 
                     echo
                     read -p "Enter video format ID (for better audio quality, choose a 'video only' format): " video_id
