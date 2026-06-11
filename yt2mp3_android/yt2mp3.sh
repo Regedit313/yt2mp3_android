@@ -9,8 +9,6 @@ fix_mp3() {
 
     find . -type f \
         ! -iname "*_fixed.mp3" \
-        ! -iname "*_normalized.mp3" \
-        ! -iname "*_320_normalized.mp3" \
         ! -iname "*_fixed_normalized.mp3" \
         -exec sh -c '
     for f do
@@ -40,29 +38,36 @@ fix_mp3() {
 normalize_audio() {
     cd download || exit 1
 
-    find . -type f \
-        ! -iname "*_normalized.mp3" \
-        ! -iname "*_320_normalized.mp3" \
-        ! -iname "*_fixed_normalized.mp3" \
-        -exec sh -c '
-    for f do
+    tmp_list="../.yt2mp3_normalize_list_$$"
+
+    find . -type f -print0 > "$tmp_list"
+
+    while IFS= read -r -d '' f; do
       case "$f" in
         *.[mM][pP]3)
           base="${f%.[mM][pP]3}"
+          base="${base//_normalized/}"
           out="${base}_normalized.mp3"
 
-          cp "$f" "$out"
-
-          if mp3gain -r -s i -c "$out"; then
-            rm -f "$f"
+          if [ "$f" = "$out" ]; then
+            if ! mp3gain -r -s i -c "$f"; then
+              echo "Error: normalization failed for $f"
+            fi
           else
-            rm -f "$out"
-            echo "Error: normalization failed for $f"
+            cp "$f" "$out"
+
+            if mp3gain -r -s i -c "$out"; then
+              rm -f "$f"
+            else
+              rm -f "$out"
+              echo "Error: normalization failed for $f"
+            fi
           fi
           ;;
 
         *)
           base="${f%.*}"
+          base="${base//_normalized/}"
           out="${base}_320_normalized.mp3"
 
           if ffmpeg -i "$f" \
@@ -86,8 +91,9 @@ normalize_audio() {
           fi
           ;;
       esac
-    done
-    ' sh {} +
+    done < "$tmp_list"
+
+    rm -f "$tmp_list"
 
     cd ..
 }
@@ -343,17 +349,23 @@ download_video_auto_resolution() {
         echo "Download Video or Playlist Auto (recommended) (${orientation})"
         echo
         echo
-        echo "1) Max 1080p"
+        echo "1) Max 4320p (8K)"
         echo
-        echo "2) Max 720p"
+        echo "2) Max 2160p (4K)"
         echo
-        echo "3) Max 480p"
+        echo "3) Max 1440p"
         echo
-        echo "4) Max 360p"
+        echo "4) Max 1080p"
         echo
-        echo "5) Max 240p"
+        echo "5) Max 720p"
         echo
-        echo "6) Max 144p"
+        echo "6) Max 480p"
+        echo
+        echo "7) Max 360p"
+        echo
+        echo "8) Max 240p"
+        echo
+        echo "9) Max 144p"
         echo
         echo
         echo "0) Return"
@@ -365,26 +377,38 @@ download_video_auto_resolution() {
         case "$quality_choice" in
 
             1)
-                download_video_auto_quality "$orientation" "1080"
+                download_video_auto_quality "$orientation" "4320"
                 ;;
 
             2)
-                download_video_auto_quality "$orientation" "720"
+                download_video_auto_quality "$orientation" "2160"
                 ;;
 
             3)
-                download_video_auto_quality "$orientation" "480"
+                download_video_auto_quality "$orientation" "1440"
                 ;;
 
             4)
-                download_video_auto_quality "$orientation" "360"
+                download_video_auto_quality "$orientation" "1080"
                 ;;
 
             5)
-                download_video_auto_quality "$orientation" "240"
+                download_video_auto_quality "$orientation" "720"
                 ;;
 
             6)
+                download_video_auto_quality "$orientation" "480"
+                ;;
+
+            7)
+                download_video_auto_quality "$orientation" "360"
+                ;;
+
+            8)
+                download_video_auto_quality "$orientation" "240"
+                ;;
+
+            9)
                 download_video_auto_quality "$orientation" "144"
                 ;;
 
