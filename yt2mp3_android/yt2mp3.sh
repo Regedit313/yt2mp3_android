@@ -100,7 +100,7 @@ download_audio() {
         echo "Download Audio from URL"
         echo
         echo
-        echo "1) Download Best Audio (recommended)"
+        echo "1) Download Audio or Playlist Auto (recommended)"
         echo
         echo "2) Choose Audio Format (expert mode)"
         echo
@@ -118,7 +118,7 @@ download_audio() {
 
                 while true; do
                     echo
-                    echo "Download Best Audio (recommended)"
+                    echo "Download Audio or Playlist Auto (recommended)"
                     echo
                     echo
                     read -p "Paste URL or type 0 to return: " url
@@ -201,6 +201,159 @@ download_audio() {
     done
 }
 
+download_video_auto_quality() {
+    orientation="$1"
+    quality="$2"
+
+    while true; do
+        clear
+
+        echo
+        echo "Download Video or Playlist Auto (recommended) (${orientation}, max ${quality}p)"
+        echo
+        echo
+        read -p "Paste URL or type 0 to return: " url
+
+        if [ "$url" = "0" ]; then
+            break
+        fi
+
+        cd download || exit 1
+
+        if [ "$orientation" = "landscape" ]; then
+            yt-dlp \
+            -f "bv*[vcodec*=avc1][height<=${quality}]+(251/bestaudio)/b[height<=${quality}]" \
+            --merge-output-format mp4 \
+            -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+            "$url"
+        else
+            yt-dlp \
+            -f "bv*[vcodec*=avc1][width<=${quality}]+(251/bestaudio)/b[width<=${quality}]" \
+            --merge-output-format mp4 \
+            -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+            "$url"
+        fi
+
+        cd ..
+
+        echo
+        echo "Video download completed."
+        echo
+        read -p "Press Enter to continue..."
+        clear
+    done
+}
+
+download_video_auto_resolution() {
+    orientation="$1"
+
+    while true; do
+        clear
+
+        echo
+        echo "Download Video or Playlist Auto (recommended) (${orientation})"
+        echo
+        echo
+        echo "1) Max 1080p"
+        echo
+        echo "2) Max 720p"
+        echo
+        echo "3) Max 480p"
+        echo
+        echo "4) Max 360p"
+        echo
+        echo "5) Max 240p"
+        echo
+        echo "6) Max 144p"
+        echo
+        echo
+        echo "0) Return"
+        echo
+        echo
+
+        read -p "Choose video quality: " quality_choice
+
+        case "$quality_choice" in
+
+            1)
+                download_video_auto_quality "$orientation" "1080"
+                ;;
+
+            2)
+                download_video_auto_quality "$orientation" "720"
+                ;;
+
+            3)
+                download_video_auto_quality "$orientation" "480"
+                ;;
+
+            4)
+                download_video_auto_quality "$orientation" "360"
+                ;;
+
+            5)
+                download_video_auto_quality "$orientation" "240"
+                ;;
+
+            6)
+                download_video_auto_quality "$orientation" "144"
+                ;;
+
+            0)
+                break
+                ;;
+
+            *)
+                echo
+                echo "Invalid choice."
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+download_video_auto() {
+    while true; do
+        clear
+
+        echo
+        echo "Download Video or Playlist Auto (recommended)"
+        echo
+        echo
+        echo "1) Landscape (classic videos)"
+        echo
+        echo "2) Portrait (shorts)"
+        echo
+        echo
+        echo "0) Return"
+        echo
+        echo
+
+        read -p "Choose video orientation: " orientation_choice
+
+        case "$orientation_choice" in
+
+            1)
+                download_video_auto_resolution "landscape"
+                ;;
+
+            2)
+                download_video_auto_resolution "portrait"
+                ;;
+
+            0)
+                break
+                ;;
+
+            *)
+                echo
+                echo "Invalid choice."
+                sleep 1
+                ;;
+        esac
+    done
+}
+
 download_video() {
     while true; do
         clear
@@ -209,9 +362,11 @@ download_video() {
         echo "Download Video from URL (to .mp4)"
         echo
         echo
-        echo "1) Choose Video + Auto Best Audio (recommended)"
+        echo "1) Download Video or Playlist Auto (recommended)"
         echo
-        echo "2) Choose Video + Choose Audio (expert mode)"
+        echo "2) Choose Video + Auto Best Audio (expert mode)"
+        echo
+        echo "3) Choose Video + Choose Audio (ultra expert mode)"
         echo
         echo
         echo "0) Return"
@@ -224,13 +379,18 @@ download_video() {
 
             1)
                 clear
+                download_video_auto
+                ;;
+
+            2)
+                clear
 
                 while true; do
                     echo
-                    echo "Choose Video + Auto Best Audio (recommended)"
+                    echo "Choose Video + Auto Best Audio (expert mode)"
                     echo
                     echo
-                    read -p "Paste URL or type 0 to return: " url
+                    read -p "Paste single video URL or type 0 to return: " url
 
                     if [ "$url" = "0" ]; then
                         break
@@ -250,7 +410,7 @@ download_video() {
                     cd download || exit 1
 
                     yt-dlp \
-                    -f "$video_id+251/bestaudio" \
+                    -f "$video_id+(251/bestaudio)" \
                     --merge-output-format mp4 \
                     -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
                     "$url"
@@ -265,15 +425,15 @@ download_video() {
                 done
                 ;;
 
-            2)
+            3)
                 clear
 
                 while true; do
                     echo
-                    echo "Choose Video + Choose Audio (expert mode)"
+                    echo "Choose Video + Choose Audio (ultra expert mode)"
                     echo
                     echo
-                    read -p "Paste URL or type 0 to return: " url
+                    read -p "Paste single video URL or type 0 to return: " url
 
                     if [ "$url" = "0" ]; then
                         break
