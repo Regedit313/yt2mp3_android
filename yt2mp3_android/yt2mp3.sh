@@ -222,13 +222,13 @@ download_video_auto_quality() {
 
         if [ "$orientation" = "landscape" ]; then
             yt-dlp \
-            -f "bv*[vcodec*=avc1][height<=${quality}]+(251/bestaudio)/b[height<=${quality}]" \
+            -f "bv*[vcodec*=avc1][height<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][height<=${quality}]/b[height<=${quality}]/bv*[height<=${quality}]+(251/bestaudio)" \
             --merge-output-format mp4 \
             -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
             "$url"
         else
             yt-dlp \
-            -f "bv*[vcodec*=avc1][width<=${quality}]+(251/bestaudio)/b[width<=${quality}]" \
+            -f "bv*[vcodec*=avc1][width<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][width<=${quality}]/b[width<=${quality}]/bv*[width<=${quality}]+(251/bestaudio)" \
             --merge-output-format mp4 \
             -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
             "$url"
