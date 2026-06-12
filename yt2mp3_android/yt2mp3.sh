@@ -338,7 +338,7 @@ download_audio() {
 
                     cd download || exit 1
 
-                    yt-dlp \
+                    if yt-dlp \
                     -f 251/bestaudio \
                     -x \
                     --retries infinite \
@@ -346,12 +346,16 @@ download_audio() {
                     --extractor-retries 10 \
                     --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-                    "$url"
+                    "$url"; then
+                        echo
+                        echo "Audio download completed."
+                    else
+                        echo
+                        echo "Audio download completed with errors or failed."
+                    fi
 
                     cd ..
 
-                    echo
-                    echo "Download completed."
                     echo
                     read -p "Press Enter to continue..."
                     clear
@@ -388,7 +392,7 @@ download_audio() {
 
                     cd download || exit 1
 
-                    yt-dlp \
+                    if yt-dlp \
                     -f "$audio_id" \
                     -x \
                     --retries infinite \
@@ -396,12 +400,16 @@ download_audio() {
                     --extractor-retries 10 \
                     --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-                    "$url"
+                    "$url"; then
+                        echo
+                        echo "Audio download completed."
+                    else
+                        echo
+                        echo "Audio download completed with errors or failed."
+                    fi
 
                     cd ..
 
-                    echo
-                    echo "Download completed."
                     echo
                     read -p "Press Enter to continue..."
                     clear
@@ -532,7 +540,7 @@ download_video_auto_quality() {
         cd download || exit 1
 
         if [ "$orientation" = "landscape" ]; then
-            yt-dlp \
+            if yt-dlp \
             -f "bv*[vcodec*=avc1][height<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][height<=${quality}]/b[height<=${quality}]/bv*[height<=${quality}]+(251/bestaudio)" \
             --merge-output-format mp4 \
             --retries infinite \
@@ -540,9 +548,15 @@ download_video_auto_quality() {
             --extractor-retries 10 \
             --retry-sleep 2 \
             -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-            "$url"
+            "$url"; then
+                echo
+                echo "Video download completed."
+            else
+                echo
+                echo "Video download completed with errors or failed."
+            fi
         else
-            yt-dlp \
+            if yt-dlp \
             -f "bv*[vcodec*=avc1][width<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][width<=${quality}]/b[width<=${quality}]/bv*[width<=${quality}]+(251/bestaudio)" \
             --merge-output-format mp4 \
             --retries infinite \
@@ -550,13 +564,17 @@ download_video_auto_quality() {
             --extractor-retries 10 \
             --retry-sleep 2 \
             -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-            "$url"
+            "$url"; then
+                echo
+                echo "Video download completed."
+            else
+                echo
+                echo "Video download completed with errors or failed."
+            fi
         fi
 
         cd ..
 
-        echo
-        echo "Video download completed."
         echo
         read -p "Press Enter to continue..."
         clear
@@ -753,7 +771,7 @@ download_video() {
 
                     cd download || exit 1
 
-                    yt-dlp \
+                    if yt-dlp \
                     -f "$video_id+(251/bestaudio)" \
                     --merge-output-format mp4 \
                     --retries infinite \
@@ -761,12 +779,16 @@ download_video() {
                     --extractor-retries 10 \
                     --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-                    "$url"
+                    "$url"; then
+                        echo
+                        echo "Video download completed."
+                    else
+                        echo
+                        echo "Video download completed with errors or failed."
+                    fi
 
                     cd ..
 
-                    echo
-                    echo "Video download completed."
                     echo
                     read -p "Press Enter to continue..."
                     clear
@@ -808,7 +830,7 @@ download_video() {
 
                     cd download || exit 1
 
-                    yt-dlp \
+                    if yt-dlp \
                     -f "$video_id+$audio_id" \
                     --merge-output-format mp4 \
                     --retries infinite \
@@ -816,12 +838,16 @@ download_video() {
                     --extractor-retries 10 \
                     --retry-sleep 2 \
                     -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-                    "$url"
+                    "$url"; then
+                        echo
+                        echo "Video download completed."
+                    else
+                        echo
+                        echo "Video download completed with errors or failed."
+                    fi
 
                     cd ..
 
-                    echo
-                    echo "Video download completed."
                     echo
                     read -p "Press Enter to continue..."
                     clear
@@ -883,8 +909,18 @@ while true; do
 
         9)
             clear
-            bash ./yt2mp3_setup.sh
-            hash -r
+
+            if [ -f "./yt2mp3_setup.sh" ]; then
+                bash ./yt2mp3_setup.sh
+                hash -r
+            else
+                echo
+                echo "Setup file is missing: yt2mp3_setup.sh"
+                echo
+                echo "Please reinstall yt2mp3_android because a required file is missing."
+                echo
+                read -p "Press Enter to continue..."
+            fi
             ;;
 
         0)
