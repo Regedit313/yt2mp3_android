@@ -7,7 +7,12 @@ mkdir -p download
 fix_mp3() {
     cd download || exit 1
 
+    find . -type f -iname "*.part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+
     find . -type f \
+        ! -iname "*.part" \
+        ! -iname "*.yt2mp3_part" \
         ! -iname "*_fixed.mp3" \
         ! -iname "*_fixed_normalized.mp3" \
         -exec bash -c '
@@ -23,6 +28,7 @@ fix_mp3() {
 
       base="${base//_normalized/}"
       out="${base}_fixed.mp3"
+      tmp_out="${out}.yt2mp3_part"
 
       if [ -e "$out" ] && [ "$f" != "$out" ]; then
         if [ -s "$out" ]; then
@@ -35,6 +41,8 @@ fix_mp3() {
         fi
       fi
 
+      rm -f "$tmp_out"
+
       if ffmpeg -i "$f" \
         -vn \
         -acodec libmp3lame \
@@ -43,15 +51,24 @@ fix_mp3() {
         -ac 2 \
         -write_xing 0 \
         -map_metadata -1 \
-        "$out"; then
+        -f mp3 \
+        "$tmp_out"; then
 
-        rm -f "$f"
+        if [ -s "$tmp_out" ]; then
+          mv -f "$tmp_out" "$out"
+          rm -f "$f"
+        else
+          rm -f "$tmp_out"
+          echo "Error: empty output after conversion for $f"
+        fi
       else
-        rm -f "$out"
+        rm -f "$tmp_out"
         echo "Error: conversion failed for $f"
       fi
     done
     ' bash {} +
+
+    find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
 
     cd ..
 }
@@ -59,9 +76,15 @@ fix_mp3() {
 normalize_audio() {
     cd download || exit 1
 
+    find . -type f -iname "*.part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+
     tmp_list="../.yt2mp3_normalize_list_$$"
 
-    find . -type f -print0 > "$tmp_list"
+    find . -type f \
+        ! -iname "*.part" \
+        ! -iname "*.yt2mp3_part" \
+        -print0 > "$tmp_list"
 
     while IFS= read -r -d '' f; do
       case "$f" in
@@ -69,6 +92,7 @@ normalize_audio() {
           base="${f%.[mM][pP]3}"
           base="${base//_normalized/}"
           out="${base}_normalized.mp3"
+          tmp_out="${out}.yt2mp3_part"
 
           if [ -e "$out" ] && [ "$f" != "$out" ]; then
             if [ -s "$out" ]; then
@@ -81,19 +105,27 @@ normalize_audio() {
             fi
           fi
 
-          if [ "$f" = "$out" ]; then
-            if ! mp3gain -r -s i -c "$f"; then
+          rm -f "$tmp_out"
+
+          if cp "$f" "$tmp_out"; then
+            if mp3gain -r -s i -c "$tmp_out"; then
+              if [ -s "$tmp_out" ]; then
+                mv -f "$tmp_out" "$out"
+
+                if [ "$f" != "$out" ]; then
+                  rm -f "$f"
+                fi
+              else
+                rm -f "$tmp_out"
+                echo "Error: empty output after normalization for $f"
+              fi
+            else
+              rm -f "$tmp_out"
               echo "Error: normalization failed for $f"
             fi
           else
-            cp "$f" "$out"
-
-            if mp3gain -r -s i -c "$out"; then
-              rm -f "$f"
-            else
-              rm -f "$out"
-              echo "Error: normalization failed for $f"
-            fi
+            rm -f "$tmp_out"
+            echo "Error: copy failed for $f"
           fi
           ;;
 
@@ -101,6 +133,7 @@ normalize_audio() {
           base="${f%.*}"
           base="${base//_normalized/}"
           out="${base}_320_normalized.mp3"
+          tmp_out="${out}.yt2mp3_part"
 
           if [ -e "$out" ] && [ "$f" != "$out" ]; then
             if [ -s "$out" ]; then
@@ -113,6 +146,8 @@ normalize_audio() {
             fi
           fi
 
+          rm -f "$tmp_out"
+
           if ffmpeg -i "$f" \
             -vn \
             -acodec libmp3lame \
@@ -120,16 +155,23 @@ normalize_audio() {
             -ar 44100 \
             -ac 2 \
             -map_metadata -1 \
-            "$out"; then
+            -f mp3 \
+            "$tmp_out"; then
 
-            if mp3gain -r -s i -c "$out"; then
-              rm -f "$f"
+            if mp3gain -r -s i -c "$tmp_out"; then
+              if [ -s "$tmp_out" ]; then
+                mv -f "$tmp_out" "$out"
+                rm -f "$f"
+              else
+                rm -f "$tmp_out"
+                echo "Error: empty output after normalization for $f"
+              fi
             else
-              rm -f "$out"
+              rm -f "$tmp_out"
               echo "Error: normalization failed for $out"
             fi
           else
-            rm -f "$out"
+            rm -f "$tmp_out"
             echo "Error: conversion failed for $f"
           fi
           ;;
@@ -138,13 +180,20 @@ normalize_audio() {
 
     rm -f "$tmp_list"
 
+    find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+
     cd ..
 }
 
 convert_audio_320() {
     cd download || exit 1
 
+    find . -type f -iname "*.part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+
     find . -type f \
+        ! -iname "*.part" \
+        ! -iname "*.yt2mp3_part" \
         ! -iname "*_320.mp3" \
         ! -iname "*_320_normalized.mp3" \
         -exec bash -c '
@@ -161,6 +210,7 @@ convert_audio_320() {
       base="${base//_normalized/}"
       base="${base//_320/}"
       out="${base}_320.mp3"
+      tmp_out="${out}.yt2mp3_part"
 
       if [ -e "$out" ] && [ "$f" != "$out" ]; then
         if [ -s "$out" ]; then
@@ -173,6 +223,8 @@ convert_audio_320() {
         fi
       fi
 
+      rm -f "$tmp_out"
+
       if ffmpeg -i "$f" \
         -vn \
         -acodec libmp3lame \
@@ -180,15 +232,24 @@ convert_audio_320() {
         -ar 44100 \
         -ac 2 \
         -map_metadata -1 \
-        "$out"; then
+        -f mp3 \
+        "$tmp_out"; then
 
-        rm -f "$f"
+        if [ -s "$tmp_out" ]; then
+          mv -f "$tmp_out" "$out"
+          rm -f "$f"
+        else
+          rm -f "$tmp_out"
+          echo "Error: empty output after conversion for $f"
+        fi
       else
-        rm -f "$out"
+        rm -f "$tmp_out"
         echo "Error: conversion failed for $f"
       fi
     done
     ' bash {} +
+
+    find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
 
     cd ..
 }
