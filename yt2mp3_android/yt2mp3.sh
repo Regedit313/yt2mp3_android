@@ -521,14 +521,13 @@ audio_tools() {
 }
 
 download_video_auto_quality() {
-    orientation="$1"
-    quality="$2"
+    quality="$1"
 
     while true; do
         clear
 
         echo
-        echo "Download Video or Playlist Auto (recommended) (${orientation}, max ${quality}p)"
+        echo "Download Video or Playlist Auto (recommended) (max ${quality}p)"
         echo
         echo
         read -p "Paste URL or type 0 to return: " url
@@ -539,38 +538,21 @@ download_video_auto_quality() {
 
         cd download || exit 1
 
-        if [ "$orientation" = "landscape" ]; then
-            if yt-dlp \
-            -f "bv*[vcodec*=avc1][height<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][height<=${quality}]/b[height<=${quality}]/bv*[height<=${quality}]+(251/bestaudio)" \
-            --merge-output-format mp4 \
-            --retries infinite \
-            --fragment-retries infinite \
-            --extractor-retries 10 \
-            --retry-sleep 2 \
-            -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-            "$url"; then
-                echo
-                echo "Video download completed."
-            else
-                echo
-                echo "Video download completed with errors or failed."
-            fi
+        if yt-dlp \
+        -f "bv*[vcodec*=avc1]+(251/bestaudio)/bv*+(251/bestaudio)/b" \
+        -S "res:${quality}" \
+        --merge-output-format mp4 \
+        --retries infinite \
+        --fragment-retries infinite \
+        --extractor-retries 10 \
+        --retry-sleep 2 \
+        -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
+        "$url"; then
+            echo
+            echo "Video download completed."
         else
-            if yt-dlp \
-            -f "bv*[vcodec*=avc1][width<=${quality}]+(251/bestaudio)/b*[vcodec*=avc1][width<=${quality}]/b[width<=${quality}]/bv*[width<=${quality}]+(251/bestaudio)" \
-            --merge-output-format mp4 \
-            --retries infinite \
-            --fragment-retries infinite \
-            --extractor-retries 10 \
-            --retry-sleep 2 \
-            -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
-            "$url"; then
-                echo
-                echo "Video download completed."
-            else
-                echo
-                echo "Video download completed with errors or failed."
-            fi
+            echo
+            echo "Video download completed with errors or failed."
         fi
 
         cd ..
@@ -581,14 +563,12 @@ download_video_auto_quality() {
     done
 }
 
-download_video_auto_resolution() {
-    orientation="$1"
-
+download_video_auto() {
     while true; do
         clear
 
         echo
-        echo "Download Video or Playlist Auto (recommended) (${orientation})"
+        echo "Download Video or Playlist Auto (recommended)"
         echo
         echo
         echo "1) Max 4320p (8K)"
@@ -619,81 +599,39 @@ download_video_auto_resolution() {
         case "$quality_choice" in
 
             1)
-                download_video_auto_quality "$orientation" "4320"
+                download_video_auto_quality "4320"
                 ;;
 
             2)
-                download_video_auto_quality "$orientation" "2160"
+                download_video_auto_quality "2160"
                 ;;
 
             3)
-                download_video_auto_quality "$orientation" "1440"
+                download_video_auto_quality "1440"
                 ;;
 
             4)
-                download_video_auto_quality "$orientation" "1080"
+                download_video_auto_quality "1080"
                 ;;
 
             5)
-                download_video_auto_quality "$orientation" "720"
+                download_video_auto_quality "720"
                 ;;
 
             6)
-                download_video_auto_quality "$orientation" "480"
+                download_video_auto_quality "480"
                 ;;
 
             7)
-                download_video_auto_quality "$orientation" "360"
+                download_video_auto_quality "360"
                 ;;
 
             8)
-                download_video_auto_quality "$orientation" "240"
+                download_video_auto_quality "240"
                 ;;
 
             9)
-                download_video_auto_quality "$orientation" "144"
-                ;;
-
-            0)
-                break
-                ;;
-
-            *)
-                echo
-                echo "Invalid choice."
-                sleep 1
-                ;;
-        esac
-    done
-}
-
-download_video_auto() {
-    while true; do
-        clear
-
-        echo
-        echo "Download Video or Playlist Auto (recommended)"
-        echo
-        echo
-        echo "1) Landscape (classic videos)"
-        echo
-        echo "2) Portrait (shorts)"
-        echo
-        echo
-        echo "0) Return"
-        echo
-        echo
-
-        read -p "Choose video orientation: " orientation_choice
-
-        case "$orientation_choice" in
-
-            1)
-                download_video_auto_resolution "landscape"
-                ;;
-
-            2)
-                download_video_auto_resolution "portrait"
+                download_video_auto_quality "144"
                 ;;
 
             0)
