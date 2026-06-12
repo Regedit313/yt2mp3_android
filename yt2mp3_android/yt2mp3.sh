@@ -4,6 +4,40 @@ cd "$(dirname "$0")" || exit 1
 
 mkdir -p download
 
+is_valid_audio_target() {
+    [ -s "$1" ] && ffmpeg -v error -xerror -i "$1" -vn -f null - >/dev/null 2>&1
+}
+
+export -f is_valid_audio_target
+
+require_tools() {
+    local missing=()
+
+    for tool in "$@"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            missing+=("$tool")
+        fi
+    done
+
+    if [ "${#missing[@]}" -gt 0 ]; then
+        echo
+        echo "Missing required tool(s):"
+        echo
+
+        for tool in "${missing[@]}"; do
+            echo "- $tool"
+        done
+
+        echo
+        echo "Run first-time Setup from option 9, then try again."
+        echo
+        read -p "Press Enter to continue..."
+        return 1
+    fi
+
+    return 0
+}
+
 fix_mp3() {
     cd download || exit 1
 
@@ -31,12 +65,12 @@ fix_mp3() {
       tmp_out="${out}.yt2mp3_part"
 
       if [ -e "$out" ] && [ "$f" != "$out" ]; then
-        if [ -s "$out" ]; then
-          echo "Duplicate target already exists, removing duplicate source: $f"
+        if is_valid_audio_target "$out"; then
+          echo "Duplicate target already exists and is valid, removing duplicate source: $f"
           rm -f "$f"
           continue
         else
-          echo "Empty target found, removing it and converting again: $out"
+          echo "Invalid target found, removing it and converting again: $out"
           rm -f "$out"
         fi
       fi
@@ -54,12 +88,12 @@ fix_mp3() {
         -f mp3 \
         "$tmp_out"; then
 
-        if [ -s "$tmp_out" ]; then
+        if is_valid_audio_target "$tmp_out"; then
           mv -f "$tmp_out" "$out"
           rm -f "$f"
         else
           rm -f "$tmp_out"
-          echo "Error: empty output after conversion for $f"
+          echo "Error: invalid output after conversion for $f"
         fi
       else
         rm -f "$tmp_out"
@@ -95,12 +129,12 @@ normalize_audio() {
           tmp_out="${out}.yt2mp3_part"
 
           if [ -e "$out" ] && [ "$f" != "$out" ]; then
-            if [ -s "$out" ]; then
-              echo "Duplicate target already exists, removing duplicate source: $f"
+            if is_valid_audio_target "$out"; then
+              echo "Duplicate target already exists and is valid, removing duplicate source: $f"
               rm -f "$f"
               continue
             else
-              echo "Empty target found, removing it and normalizing again: $out"
+              echo "Invalid target found, removing it and normalizing again: $out"
               rm -f "$out"
             fi
           fi
@@ -109,7 +143,7 @@ normalize_audio() {
 
           if cp "$f" "$tmp_out"; then
             if mp3gain -r -s i -c "$tmp_out"; then
-              if [ -s "$tmp_out" ]; then
+              if is_valid_audio_target "$tmp_out"; then
                 mv -f "$tmp_out" "$out"
 
                 if [ "$f" != "$out" ]; then
@@ -117,7 +151,7 @@ normalize_audio() {
                 fi
               else
                 rm -f "$tmp_out"
-                echo "Error: empty output after normalization for $f"
+                echo "Error: invalid output after normalization for $f"
               fi
             else
               rm -f "$tmp_out"
@@ -136,12 +170,12 @@ normalize_audio() {
           tmp_out="${out}.yt2mp3_part"
 
           if [ -e "$out" ] && [ "$f" != "$out" ]; then
-            if [ -s "$out" ]; then
-              echo "Duplicate target already exists, removing duplicate source: $f"
+            if is_valid_audio_target "$out"; then
+              echo "Duplicate target already exists and is valid, removing duplicate source: $f"
               rm -f "$f"
               continue
             else
-              echo "Empty target found, removing it and converting again: $out"
+              echo "Invalid target found, removing it and converting again: $out"
               rm -f "$out"
             fi
           fi
@@ -159,12 +193,12 @@ normalize_audio() {
             "$tmp_out"; then
 
             if mp3gain -r -s i -c "$tmp_out"; then
-              if [ -s "$tmp_out" ]; then
+              if is_valid_audio_target "$tmp_out"; then
                 mv -f "$tmp_out" "$out"
                 rm -f "$f"
               else
                 rm -f "$tmp_out"
-                echo "Error: empty output after normalization for $f"
+                echo "Error: invalid output after normalization for $f"
               fi
             else
               rm -f "$tmp_out"
@@ -213,12 +247,12 @@ convert_audio_320() {
       tmp_out="${out}.yt2mp3_part"
 
       if [ -e "$out" ] && [ "$f" != "$out" ]; then
-        if [ -s "$out" ]; then
-          echo "Duplicate target already exists, removing duplicate source: $f"
+        if is_valid_audio_target "$out"; then
+          echo "Duplicate target already exists and is valid, removing duplicate source: $f"
           rm -f "$f"
           continue
         else
-          echo "Empty target found, removing it and converting again: $out"
+          echo "Invalid target found, removing it and converting again: $out"
           rm -f "$out"
         fi
       fi
@@ -235,12 +269,12 @@ convert_audio_320() {
         -f mp3 \
         "$tmp_out"; then
 
-        if [ -s "$tmp_out" ]; then
+        if is_valid_audio_target "$tmp_out"; then
           mv -f "$tmp_out" "$out"
           rm -f "$f"
         else
           rm -f "$tmp_out"
-          echo "Error: empty output after conversion for $f"
+          echo "Error: invalid output after conversion for $f"
         fi
       else
         rm -f "$tmp_out"
@@ -255,6 +289,10 @@ convert_audio_320() {
 }
 
 download_audio() {
+    if ! require_tools yt-dlp; then
+        return
+    fi
+
     while true; do
         clear
 
@@ -298,7 +336,7 @@ download_audio() {
                     --fragment-retries infinite \
                     --extractor-retries 10 \
                     --retry-sleep 2 \
-                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
                     "$url"
 
                     cd ..
@@ -348,7 +386,7 @@ download_audio() {
                     --fragment-retries infinite \
                     --extractor-retries 10 \
                     --retry-sleep 2 \
-                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
                     "$url"
 
                     cd ..
@@ -402,46 +440,54 @@ audio_tools() {
             1)
                 clear
 
-                convert_audio_320
+                if require_tools ffmpeg; then
+                    convert_audio_320
 
-                echo
-                echo "Convert to MP3 320 completed."
-                echo
-                read -p "Press Enter to continue..."
+                    echo
+                    echo "Convert to MP3 320 completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                fi
                 ;;
 
             2)
                 clear
 
-                normalize_audio
+                if require_tools ffmpeg mp3gain; then
+                    normalize_audio
 
-                echo
-                echo "Normalize Volume completed."
-                echo
-                read -p "Press Enter to continue..."
+                    echo
+                    echo "Normalize Volume completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                fi
                 ;;
 
             3)
                 clear
 
-                fix_mp3
+                if require_tools ffmpeg; then
+                    fix_mp3
 
-                echo
-                echo "Fix Format completed."
-                echo
-                read -p "Press Enter to continue..."
+                    echo
+                    echo "Fix Format completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                fi
                 ;;
 
             4)
                 clear
 
-                fix_mp3
-                normalize_audio
+                if require_tools ffmpeg mp3gain; then
+                    fix_mp3
+                    normalize_audio
 
-                echo
-                echo "Fix Format + Normalize Volume completed."
-                echo
-                read -p "Press Enter to continue..."
+                    echo
+                    echo "Fix Format + Normalize Volume completed."
+                    echo
+                    read -p "Press Enter to continue..."
+                fi
                 ;;
 
             0)
@@ -484,7 +530,7 @@ download_video_auto_quality() {
             --fragment-retries infinite \
             --extractor-retries 10 \
             --retry-sleep 2 \
-            -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+            -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
             "$url"
         else
             yt-dlp \
@@ -494,7 +540,7 @@ download_video_auto_quality() {
             --fragment-retries infinite \
             --extractor-retries 10 \
             --retry-sleep 2 \
-            -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+            -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
             "$url"
         fi
 
@@ -637,6 +683,10 @@ download_video_auto() {
 }
 
 download_video() {
+    if ! require_tools yt-dlp; then
+        return
+    fi
+
     while true; do
         clear
 
@@ -701,7 +751,7 @@ download_video() {
                     --fragment-retries infinite \
                     --extractor-retries 10 \
                     --retry-sleep 2 \
-                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
                     "$url"
 
                     cd ..
@@ -756,7 +806,7 @@ download_video() {
                     --fragment-retries infinite \
                     --extractor-retries 10 \
                     --retry-sleep 2 \
-                    -o "%(uploader)s - %(title)s [%(format_id)s].%(ext)s" \
+                    -o "%(uploader)s - %(title)s [%(id)s] [%(format_id)s].%(ext)s" \
                     "$url"
 
                     cd ..
@@ -825,6 +875,7 @@ while true; do
         9)
             clear
             bash ./yt2mp3_setup.sh
+            hash -r
             ;;
 
         0)
