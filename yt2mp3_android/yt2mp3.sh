@@ -43,10 +43,12 @@ fix_mp3() {
 
     find . -type f -iname "*.part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
     find . -type f \
         ! -iname "*.part" \
         ! -iname "*.yt2mp3_part" \
+        ! -iname "*.yt2mp3_part.mp3" \
         ! -iname "*_fixed.mp3" \
         ! -iname "*_fixed_normalized.mp3" \
         -exec bash -c '
@@ -62,7 +64,7 @@ fix_mp3() {
 
       base="${base//_normalized/}"
       out="${base}_fixed.mp3"
-      tmp_out="${out}.yt2mp3_part"
+      tmp_out="${out%.mp3}.yt2mp3_part.mp3"
 
       if [ -e "$out" ] && [ "$f" != "$out" ]; then
         if is_valid_audio_target "$out"; then
@@ -103,6 +105,7 @@ fix_mp3() {
     ' bash {} +
 
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
     cd ..
 }
@@ -112,12 +115,14 @@ normalize_audio() {
 
     find . -type f -iname "*.part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
     tmp_list="../.yt2mp3_normalize_list_$$"
 
     find . -type f \
         ! -iname "*.part" \
         ! -iname "*.yt2mp3_part" \
+        ! -iname "*.yt2mp3_part.mp3" \
         -print0 > "$tmp_list"
 
     while IFS= read -r -d '' f; do
@@ -126,7 +131,7 @@ normalize_audio() {
           base="${f%.[mM][pP]3}"
           base="${base//_normalized/}"
           out="${base}_normalized.mp3"
-          tmp_out="${out}.yt2mp3_part"
+          tmp_out="${out%.mp3}.yt2mp3_part.mp3"
 
           if [ -e "$out" ] && [ "$f" != "$out" ]; then
             if is_valid_audio_target "$out"; then
@@ -167,7 +172,7 @@ normalize_audio() {
           base="${f%.*}"
           base="${base//_normalized/}"
           out="${base}_320_normalized.mp3"
-          tmp_out="${out}.yt2mp3_part"
+          tmp_out="${out%.mp3}.yt2mp3_part.mp3"
 
           if [ -e "$out" ] && [ "$f" != "$out" ]; then
             if is_valid_audio_target "$out"; then
@@ -215,6 +220,7 @@ normalize_audio() {
     rm -f "$tmp_list"
 
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
     cd ..
 }
@@ -224,10 +230,12 @@ convert_audio_320() {
 
     find . -type f -iname "*.part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
     find . -type f \
         ! -iname "*.part" \
         ! -iname "*.yt2mp3_part" \
+        ! -iname "*.yt2mp3_part.mp3" \
         ! -iname "*_320.mp3" \
         ! -iname "*_320_normalized.mp3" \
         -exec bash -c '
@@ -244,7 +252,7 @@ convert_audio_320() {
       base="${base//_normalized/}"
       base="${base//_320/}"
       out="${base}_320.mp3"
-      tmp_out="${out}.yt2mp3_part"
+      tmp_out="${out%.mp3}.yt2mp3_part.mp3"
 
       if [ -e "$out" ] && [ "$f" != "$out" ]; then
         if is_valid_audio_target "$out"; then
@@ -284,12 +292,13 @@ convert_audio_320() {
     ' bash {} +
 
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
+    find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
     cd ..
 }
 
 download_audio() {
-    if ! require_tools yt-dlp; then
+    if ! require_tools yt-dlp ffmpeg; then
         return
     fi
 
@@ -683,7 +692,7 @@ download_video_auto() {
 }
 
 download_video() {
-    if ! require_tools yt-dlp; then
+    if ! require_tools yt-dlp ffmpeg; then
         return
     fi
 
