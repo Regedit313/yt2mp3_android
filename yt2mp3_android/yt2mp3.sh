@@ -10,9 +10,30 @@ fix_mp3() {
     find . -type f \
         ! -iname "*_fixed.mp3" \
         ! -iname "*_fixed_normalized.mp3" \
-        -exec sh -c '
+        -exec bash -c '
     for f do
-      out="${f%.*}_fixed.mp3"
+      case "$f" in
+        *.[mM][pP]3)
+          base="${f%.[mM][pP]3}"
+          ;;
+        *)
+          base="${f%.*}"
+          ;;
+      esac
+
+      base="${base//_normalized/}"
+      out="${base}_fixed.mp3"
+
+      if [ -e "$out" ] && [ "$f" != "$out" ]; then
+        if [ -s "$out" ]; then
+          echo "Duplicate target already exists, removing duplicate source: $f"
+          rm -f "$f"
+          continue
+        else
+          echo "Empty target found, removing it and converting again: $out"
+          rm -f "$out"
+        fi
+      fi
 
       if ffmpeg -i "$f" \
         -vn \
@@ -30,7 +51,7 @@ fix_mp3() {
         echo "Error: conversion failed for $f"
       fi
     done
-    ' sh {} +
+    ' bash {} +
 
     cd ..
 }
@@ -48,6 +69,17 @@ normalize_audio() {
           base="${f%.[mM][pP]3}"
           base="${base//_normalized/}"
           out="${base}_normalized.mp3"
+
+          if [ -e "$out" ] && [ "$f" != "$out" ]; then
+            if [ -s "$out" ]; then
+              echo "Duplicate target already exists, removing duplicate source: $f"
+              rm -f "$f"
+              continue
+            else
+              echo "Empty target found, removing it and normalizing again: $out"
+              rm -f "$out"
+            fi
+          fi
 
           if [ "$f" = "$out" ]; then
             if ! mp3gain -r -s i -c "$f"; then
@@ -69,6 +101,17 @@ normalize_audio() {
           base="${f%.*}"
           base="${base//_normalized/}"
           out="${base}_320_normalized.mp3"
+
+          if [ -e "$out" ] && [ "$f" != "$out" ]; then
+            if [ -s "$out" ]; then
+              echo "Duplicate target already exists, removing duplicate source: $f"
+              rm -f "$f"
+              continue
+            else
+              echo "Empty target found, removing it and converting again: $out"
+              rm -f "$out"
+            fi
+          fi
 
           if ffmpeg -i "$f" \
             -vn \
@@ -104,7 +147,7 @@ convert_audio_320() {
     find . -type f \
         ! -iname "*_320.mp3" \
         ! -iname "*_320_normalized.mp3" \
-        -exec sh -c '
+        -exec bash -c '
     for f do
       case "$f" in
         *.[mM][pP]3)
@@ -118,6 +161,17 @@ convert_audio_320() {
       base="${base//_normalized/}"
       base="${base//_320/}"
       out="${base}_320.mp3"
+
+      if [ -e "$out" ] && [ "$f" != "$out" ]; then
+        if [ -s "$out" ]; then
+          echo "Duplicate target already exists, removing duplicate source: $f"
+          rm -f "$f"
+          continue
+        else
+          echo "Empty target found, removing it and converting again: $out"
+          rm -f "$out"
+        fi
+      fi
 
       if ffmpeg -i "$f" \
         -vn \
@@ -134,7 +188,7 @@ convert_audio_320() {
         echo "Error: conversion failed for $f"
       fi
     done
-    ' sh {} +
+    ' bash {} +
 
     cd ..
 }
