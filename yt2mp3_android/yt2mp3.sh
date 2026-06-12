@@ -98,6 +98,47 @@ normalize_audio() {
     cd ..
 }
 
+convert_audio_320() {
+    cd download || exit 1
+
+    find . -type f \
+        ! -iname "*_320.mp3" \
+        ! -iname "*_320_normalized.mp3" \
+        -exec sh -c '
+    for f do
+      case "$f" in
+        *.[mM][pP]3)
+          base="${f%.[mM][pP]3}"
+          ;;
+        *)
+          base="${f%.*}"
+          ;;
+      esac
+
+      base="${base//_normalized/}"
+      base="${base//_320/}"
+      out="${base}_320.mp3"
+
+      if ffmpeg -i "$f" \
+        -vn \
+        -acodec libmp3lame \
+        -b:a 320k \
+        -ar 44100 \
+        -ac 2 \
+        -map_metadata -1 \
+        "$out"; then
+
+        rm -f "$f"
+      else
+        rm -f "$out"
+        echo "Error: conversion failed for $f"
+      fi
+    done
+    ' sh {} +
+
+    cd ..
+}
+
 download_audio() {
     while true; do
         clear
@@ -226,11 +267,13 @@ audio_tools() {
         echo "Audio Tools / Convert"
         echo
         echo
-        echo "1) Normalize Volume (best quality)"
+        echo "1) Convert to MP3 320"
         echo
-        echo "2) Fix Format (old MP3 players)"
+        echo "2) Normalize Volume (best quality)"
         echo
-        echo "3) Fix Format (old MP3 players) + Normalize Volume"
+        echo "3) Fix Format (old MP3 players)"
+        echo
+        echo "4) Fix Format (old MP3 players) + Normalize Volume"
         echo
         echo
         echo "0) Return"
@@ -244,6 +287,17 @@ audio_tools() {
             1)
                 clear
 
+                convert_audio_320
+
+                echo
+                echo "Convert to MP3 320 completed."
+                echo
+                read -p "Press Enter to continue..."
+                ;;
+
+            2)
+                clear
+
                 normalize_audio
 
                 echo
@@ -252,7 +306,7 @@ audio_tools() {
                 read -p "Press Enter to continue..."
                 ;;
 
-            2)
+            3)
                 clear
 
                 fix_mp3
@@ -263,7 +317,7 @@ audio_tools() {
                 read -p "Press Enter to continue..."
                 ;;
 
-            3)
+            4)
                 clear
 
                 fix_mp3
