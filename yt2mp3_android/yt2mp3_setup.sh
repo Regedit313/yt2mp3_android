@@ -5,7 +5,7 @@ clear
 cd "$(dirname "$0")" || exit 1
 
 echo
-echo "yt2mp3_android setup"
+echo "yt2mp3_android Setup / Update"
 echo
 
 echo "Creating project folders..."
