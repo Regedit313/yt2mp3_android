@@ -29,7 +29,7 @@ require_tools() {
         done
 
         echo
-        echo "Run first-time Setup from option 9, then try again."
+        echo "Run Setup / Update from option 9, then try again."
         echo
         read -p "Press Enter to continue..."
         return 1
@@ -820,7 +820,7 @@ while true; do
     echo "3) Video Download from URL"
     echo
     echo
-    echo "9) Run first-time Setup (required before first use)"
+    echo "9) Run Setup / Update (required before first use)"
     echo
     echo "0) Exit"
     echo
