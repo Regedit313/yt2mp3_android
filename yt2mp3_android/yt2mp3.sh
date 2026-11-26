@@ -416,7 +416,7 @@ download_audio() {
                 done
                 ;;
 
-            0)
+            0|"")
                 break
                 ;;
 
@@ -507,7 +507,7 @@ audio_tools() {
                 fi
                 ;;
 
-            0)
+            0|"")
                 break
                 ;;
 
@@ -634,7 +634,7 @@ download_video_auto() {
                 download_video_auto_quality "144"
                 ;;
 
-            0)
+            0|"")
                 break
                 ;;
 
@@ -792,7 +792,7 @@ download_video() {
                 done
                 ;;
 
-            0)
+            0|"")
                 break
                 ;;
 
@@ -861,7 +861,7 @@ while true; do
             fi
             ;;
 
-        0)
+        0|"")
             clear
             exit 0
             ;;
