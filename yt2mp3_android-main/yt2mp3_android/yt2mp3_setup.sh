@@ -8,8 +8,7 @@ echo
 echo "yt2mp3_android Setup / Update"
 echo
 
-echo "Creating project folders..."
-mkdir -p download
+DATA_DIR="$HOME/storage/shared/yt2mp3_data"
 
 echo
 echo "Updating Termux..."
@@ -49,6 +48,10 @@ else
     echo
     echo "Storage is already configured."
 fi
+
+echo
+echo "Creating data folder..."
+mkdir -p "$DATA_DIR" || exit 1
 
 echo
 echo "Installing system tools..."

@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-cd "$(dirname "$0")" || exit 1
+APP_DIR="$(cd "$(dirname "$0")" && pwd)" || exit 1
+DATA_DIR="$HOME/storage/shared/yt2mp3_data"
 
-mkdir -p download
+cd "$APP_DIR" || exit 1
+mkdir -p "$DATA_DIR" || exit 1
 
 is_valid_audio_target() {
     [ -s "$1" ] && ffmpeg -v error -xerror -i "$1" -vn -f null - >/dev/null 2>&1
@@ -39,7 +41,7 @@ require_tools() {
 }
 
 fix_mp3() {
-    cd download || exit 1
+    cd "$DATA_DIR" || exit 1
 
     find . -type f -iname "*.part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
@@ -107,11 +109,11 @@ fix_mp3() {
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
-    cd ..
+    cd "$APP_DIR" || exit 1
 }
 
 normalize_audio() {
-    cd download || exit 1
+    cd "$DATA_DIR" || exit 1
 
     find . -type f -iname "*.part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
@@ -222,11 +224,11 @@ normalize_audio() {
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
-    cd ..
+    cd "$APP_DIR" || exit 1
 }
 
 convert_audio_320() {
-    cd download || exit 1
+    cd "$DATA_DIR" || exit 1
 
     find . -type f -iname "*.part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
@@ -294,7 +296,7 @@ convert_audio_320() {
     find . -type f -iname "*.yt2mp3_part" -exec rm -f {} +
     find . -type f -iname "*.yt2mp3_part.mp3" -exec rm -f {} +
 
-    cd ..
+    cd "$APP_DIR" || exit 1
 }
 
 download_audio() {
@@ -336,7 +338,7 @@ download_audio() {
                         break
                     fi
 
-                    cd download || exit 1
+                    cd "$DATA_DIR" || exit 1
 
                     if yt-dlp \
                     -f 251/bestaudio \
@@ -354,7 +356,7 @@ download_audio() {
                         echo "Audio download completed with errors or failed."
                     fi
 
-                    cd ..
+                    cd "$APP_DIR" || exit 1
 
                     echo
                     read -p "Press Enter to continue..."
@@ -390,7 +392,7 @@ download_audio() {
 
                     [ -z "$audio_id" ] && continue
 
-                    cd download || exit 1
+                    cd "$DATA_DIR" || exit 1
 
                     if yt-dlp \
                     -f "$audio_id" \
@@ -408,7 +410,7 @@ download_audio() {
                         echo "Audio download completed with errors or failed."
                     fi
 
-                    cd ..
+                    cd "$APP_DIR" || exit 1
 
                     echo
                     read -p "Press Enter to continue..."
@@ -536,7 +538,7 @@ download_video_auto_quality() {
             break
         fi
 
-        cd download || exit 1
+        cd "$DATA_DIR" || exit 1
 
         if yt-dlp \
         -f "bv*[vcodec*=avc1]+(251/bestaudio)/bv*+(251/bestaudio)/b" \
@@ -555,7 +557,7 @@ download_video_auto_quality() {
             echo "Video download completed with errors or failed."
         fi
 
-        cd ..
+        cd "$APP_DIR" || exit 1
 
         echo
         read -p "Press Enter to continue..."
@@ -707,7 +709,7 @@ download_video() {
 
                     [ -z "$video_id" ] && continue
 
-                    cd download || exit 1
+                    cd "$DATA_DIR" || exit 1
 
                     if yt-dlp \
                     -f "$video_id+(251/bestaudio)" \
@@ -725,7 +727,7 @@ download_video() {
                         echo "Video download completed with errors or failed."
                     fi
 
-                    cd ..
+                    cd "$APP_DIR" || exit 1
 
                     echo
                     read -p "Press Enter to continue..."
@@ -766,7 +768,7 @@ download_video() {
 
                     [ -z "$audio_id" ] && continue
 
-                    cd download || exit 1
+                    cd "$DATA_DIR" || exit 1
 
                     if yt-dlp \
                     -f "$video_id+$audio_id" \
@@ -784,7 +786,7 @@ download_video() {
                         echo "Video download completed with errors or failed."
                     fi
 
-                    cd ..
+                    cd "$APP_DIR" || exit 1
 
                     echo
                     read -p "Press Enter to continue..."

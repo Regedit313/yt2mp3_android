@@ -58,7 +58,7 @@ Paste a supported URL.
 
 The downloaded audio files are saved in:
 
-download/
+~/storage/shared/yt2mp3_data/
 
 You can download multiple URLs without leaving the menu.
 
@@ -174,11 +174,15 @@ yt2mp3_android/
 
 ---- yt2mp3_setup.sh
 
----- download/
+---- yt2mp3_termuxshortcut.sh
+
+yt2mp3_data/
+
+The data folder is separate from the application folder and is preserved during application updates.
 
 All downloaded and processed files are stored inside:
 
-download/
+~/storage/shared/yt2mp3_data/
 
 ---
 
@@ -186,9 +190,9 @@ download/
 
 The required folders are automatically created if they do not already exist.
 
-The download/ folder is automatically recreated if it is missing.
+The ~/storage/shared/yt2mp3_data/ folder is automatically recreated if it is missing.
 
-All downloaded, fixed, and normalized files are stored in the download/ folder.
+All downloaded, fixed, and normalized files are stored in the ~/storage/shared/yt2mp3_data/ folder.
 
 Downloaded files can be processed individually or in batches.
 
