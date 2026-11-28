@@ -334,7 +334,7 @@ download_audio() {
                     echo
                     read -p "Paste URL or type 0 to return: " url
 
-                    if [ "$url" = "0" ]; then
+                    if [[ "$url" == "0" || -z "$url" ]]; then
                         break
                     fi
 
@@ -374,7 +374,7 @@ download_audio() {
                     echo
                     read -p "Paste URL or type 0 to return: " url
 
-                    if [ "$url" = "0" ]; then
+                    if [[ "$url" == "0" || -z "$url" ]]; then
                         break
                     fi
 
@@ -534,7 +534,7 @@ download_video_auto_quality() {
         echo
         read -p "Paste URL or type 0 to return: " url
 
-        if [ "$url" = "0" ]; then
+        if [[ "$url" == "0" || -z "$url" ]]; then
             break
         fi
 
@@ -691,7 +691,7 @@ download_video() {
                     echo
                     read -p "Paste single video URL or type 0 to return: " url
 
-                    if [ "$url" = "0" ]; then
+                    if [[ "$url" == "0" || -z "$url" ]]; then
                         break
                     fi
 
@@ -745,7 +745,7 @@ download_video() {
                     echo
                     read -p "Paste single video URL or type 0 to return: " url
 
-                    if [ "$url" = "0" ]; then
+                    if [[ "$url" == "0" || -z "$url" ]]; then
                         break
                     fi
 
